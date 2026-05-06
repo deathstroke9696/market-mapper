@@ -41,7 +41,7 @@ const Index = () => {
                 </p>
               </div>
               <div className="h-[550px]">
-                <IndiaMap data={filteredData} />
+                <IndiaMap data={filteredData} selectedStates={filters.state} />
               </div>
             </div>
 
