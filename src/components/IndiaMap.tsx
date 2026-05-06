@@ -28,8 +28,8 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
       <MapContainer
-        center={[16.5, 74.4]}
-        zoom={10}
+        center={[20.5, 78.9]}
+        zoom={5}
         minZoom={4}
         maxZoom={18}
         scrollWheelZoom={true}
@@ -41,11 +41,11 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {data.map((market) => (
+        {data.map((market, idx) => (
           <CircleMarker
-            key={market.marketName}
+            key={`${market.marketName}-${idx}`}
             center={[market.coordinates[1], market.coordinates[0]]}
-            radius={activeMarket === market.marketName ? 12 : 8}
+            radius={activeMarket === `${market.marketName}-${idx}` ? 12 : 8}
             pathOptions={{
               fillColor: BAND_COLORS[market.band],
               fillOpacity: 0.85,
@@ -53,7 +53,7 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
               weight: 2.5,
             }}
             eventHandlers={{
-              mouseover: () => setActiveMarket(market.marketName),
+              mouseover: () => setActiveMarket(`${market.marketName}-${idx}`),
               mouseout: () => setActiveMarket(null),
             }}
           >
@@ -81,12 +81,12 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
                   <div>
-                    <div style={{ color: "#888" }}>Jadugar</div>
-                    <div style={{ fontWeight: 600 }}>{(market.jadugar ?? 0).toLocaleString()}</div>
+                    <div style={{ color: "#888" }}>Vol</div>
+                    <div style={{ fontWeight: 600 }}>{(market.vol ?? 0).toLocaleString()}</div>
                   </div>
                   <div>
-                    <div style={{ color: "#888" }}>Jadugar %</div>
-                    <div style={{ fontWeight: 600 }}>{market.jadugarPercent ?? 0}%</div>
+                    <div style={{ color: "#888" }}>Vol %</div>
+                    <div style={{ fontWeight: 600 }}>{market.volPercent ?? 0}%</div>
                   </div>
                 </div>
               </div>
