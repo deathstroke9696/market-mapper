@@ -17,6 +17,7 @@ export const MarketTable = ({ data }: MarketTableProps) => (
           <TableHead className="text-muted-foreground font-semibold text-xs">Branch</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">Brand</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">Segment</TableHead>
+          <TableHead className="text-muted-foreground font-semibold text-xs">Trend Belt</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs text-right">Vol</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs text-right">Vol %</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">Band</TableHead>
@@ -30,6 +31,7 @@ export const MarketTable = ({ data }: MarketTableProps) => (
             <TableCell className="text-sm text-muted-foreground">{row.branch}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{row.brand}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{row.segment}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{row.trendBelt}</TableCell>
             <TableCell className="text-right text-sm">{(row.vol ?? 0).toLocaleString()}</TableCell>
             <TableCell className="text-right text-sm">{row.volPercent ?? 0}%</TableCell>
             <TableCell>

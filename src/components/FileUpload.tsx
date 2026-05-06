@@ -131,6 +131,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         const volCol = keys.find(
           (k) => k.trim().toLowerCase().includes("vol") && k !== volPctCol
         ) || keys.find((k) => k.trim().toLowerCase() === "vol");
+        const trendBeltCol = findCol("trend belt") || findCol("trendbelt");
 
         if (!townCol || !bandCol) {
           toast({ title: "Invalid format", description: "File must have Town and Band columns.", variant: "destructive" });
@@ -180,6 +181,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
             goiDistrict: goiDistCol ? String(row[goiDistCol] || "").trim() : "—",
             brand: brandCol ? String(row[brandCol] || "").trim() : "—",
             segment: segmentCol ? String(row[segmentCol] || "").trim() : "—",
+            trendBelt: trendBeltCol ? String(row[trendBeltCol] || "").trim() : "—",
             vol,
             volPercent,
             band,
