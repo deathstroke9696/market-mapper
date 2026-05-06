@@ -79,7 +79,7 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
   };
 
   return (
-    <div className="relative w-full h-full rounded-lg overflow-hidden">
+    <div className="leaflet-container-scoped relative w-full h-full rounded-lg overflow-hidden">
       <MapContainer
         center={[20.5, 78.9]}
         zoom={5}
