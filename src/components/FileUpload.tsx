@@ -17,7 +17,57 @@ const normalizeBand = (val: string): Band | null => {
   return found ?? null;
 };
 
-const geocodeCache: Record<string, [number, number] | null> = {};
+const GEOCODE_CACHE_KEY = "marketMapper.geocodeCache";
+
+const loadCacheFromStorage = (): Record<string, [number, number]> => {
+  try {
+    const raw = localStorage.getItem(GEOCODE_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") return parsed;
+    }
+  } catch {
+    // corrupted cache – ignore
+  }
+  return {};
+};
+
+const saveCacheToStorage = (cache: Record<string, [number, number]>) => {
+  try {
+    localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // storage full or unavailable – ignore
+  }
+};
+
+// Persistent cache (coordinates only – no nulls)
+const persistentCache: Record<string, [number, number]> = loadCacheFromStorage();
+// Session-only cache for null results (failed geocodes)
+const sessionNullCache: Set<string> = new Set();
+
+// Unified lookup
+const geocodeCache: Record<string, [number, number] | null> = new Proxy(
+  {} as Record<string, [number, number] | null>,
+  {
+    get(_, key: string) {
+      if (key in persistentCache) return persistentCache[key];
+      if (sessionNullCache.has(key)) return null;
+      return undefined;
+    },
+    has(_, key: string) {
+      return key in persistentCache || sessionNullCache.has(key);
+    },
+    set(_, key: string, value: [number, number] | null) {
+      if (value) {
+        persistentCache[key] = value;
+        saveCacheToStorage(persistentCache);
+      } else {
+        sessionNullCache.add(key);
+      }
+      return true;
+    },
+  }
+);
 
 const geocodeTown = async (town: string, retries = 2): Promise<[number, number] | null> => {
   const key = town.trim().toLowerCase();
