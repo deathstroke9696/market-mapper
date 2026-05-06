@@ -286,62 +286,64 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
   );
 
   return (
-    <div
-      className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors ${
-        dragging ? "border-primary bg-primary/5" : "border-border"
-      }`}
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={handleDrop}
-    >
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+    <>
+      <div
+        className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors ${
+          dragging ? "border-primary bg-primary/5" : "border-border"
+        }`}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+      >
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+            {loading ? (
+              <Loader2 className="w-7 h-7 text-muted-foreground animate-spin" />
+            ) : (
+              <FileSpreadsheet className="w-7 h-7 text-muted-foreground" />
+            )}
+          </div>
           {loading ? (
-            <Loader2 className="w-7 h-7 text-muted-foreground animate-spin" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Processing your file...</p>
+              <p className="text-xs text-muted-foreground mt-1">{progress}</p>
+            </div>
           ) : (
-            <FileSpreadsheet className="w-7 h-7 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Drag & drop your Excel file here</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Circle | Section | GOI District | Brand | Segment | Town | Vol | % | Band | State</span>
+              </p>
+            </div>
+          )}
+          {!loading && (
+            <label>
+              <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileInput} />
+              <Button variant="outline" size="sm" asChild>
+                <span className="cursor-pointer">
+                  <Upload className="w-4 h-4 mr-1" />
+                  Browse files
+                </span>
+              </Button>
+            </label>
           )}
         </div>
-        {loading ? (
-          <div>
-            <p className="text-sm font-medium text-foreground">Processing your file...</p>
-            <p className="text-xs text-muted-foreground mt-1">{progress}</p>
-          </div>
-        ) : (
-          <div>
-            <p className="text-sm font-medium text-foreground">Drag & drop your Excel file here</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Circle | Section | GOI District | Brand | Segment | Town | Vol | % | Band | State</span>
-            </p>
-          </div>
-        )}
-        {!loading && (
-          <label>
-            <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileInput} />
-            <Button variant="outline" size="sm" asChild>
-              <span className="cursor-pointer">
-                <Upload className="w-4 h-4 mr-1" />
-                Browse files
-              </span>
-            </Button>
-          </label>
-        )}
       </div>
-    </div>
-    <div className="flex justify-end mt-2">
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => {
-          localStorage.removeItem(GEOCODE_CACHE_KEY);
-          Object.keys(persistentCache).forEach((k) => delete persistentCache[k]);
-          sessionNullCache.clear();
-          toast({ title: "Cache cleared", description: "Geocoding cache has been reset." });
-        }}
-      >
-        <Trash2 className="w-3.5 h-3.5 mr-1" />
-        Clear geocoding cache
-      </Button>
-    </div>
+      <div className="flex justify-end mt-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            localStorage.removeItem(GEOCODE_CACHE_KEY);
+            Object.keys(persistentCache).forEach((k) => delete persistentCache[k]);
+            sessionNullCache.clear();
+            toast({ title: "Cache cleared", description: "Geocoding cache has been reset." });
+          }}
+        >
+          <Trash2 className="w-3.5 h-3.5 mr-1" />
+          Clear geocoding cache
+        </Button>
+      </div>
+    </>
   );
 };
