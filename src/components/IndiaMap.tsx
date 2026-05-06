@@ -81,11 +81,11 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
                   <div>
                     <div style={{ color: "#888" }}>Jadugar</div>
-                    <div style={{ fontWeight: 600 }}>{market.jadugar.toLocaleString()}</div>
+                    <div style={{ fontWeight: 600 }}>{(market.jadugar ?? 0).toLocaleString()}</div>
                   </div>
                   <div>
                     <div style={{ color: "#888" }}>Jadugar %</div>
-                    <div style={{ fontWeight: 600 }}>{market.jadugarPercent}%</div>
+                    <div style={{ fontWeight: 600 }}>{market.jadugarPercent ?? 0}%</div>
                   </div>
                 </div>
               </div>
