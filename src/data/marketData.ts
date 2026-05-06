@@ -2,6 +2,7 @@ export type Band = "Green" | "Yellow" | "Orange" | "Red" | "Blue" | "Grey";
 
 export interface MarketData {
   marketName: string;
+  state: string;
   jadugar: number;
   jadugarPercent: number;
   band: Band;
@@ -74,9 +75,9 @@ export const TOWN_COORDINATES: Record<string, [number, number]> = {
 };
 
 export const sampleMarketData: MarketData[] = [
-  { marketName: "Ichalkaranji", jadugar: 4520, jadugarPercent: 66.5, band: "Green", coordinates: [74.4605, 16.6912] },
-  { marketName: "Jaysingpur", jadugar: 2100, jadugarPercent: 48.8, band: "Yellow", coordinates: [74.5664, 16.7835] },
-  { marketName: "Kagal", jadugar: 1500, jadugarPercent: 38.5, band: "Orange", coordinates: [74.3154, 16.577] },
-  { marketName: "Gadhinglaj", jadugar: 980, jadugarPercent: 30.6, band: "Red", coordinates: [74.3501, 16.2229] },
-  { marketName: "Panhala", jadugar: 1800, jadugarPercent: 75.0, band: "Green", coordinates: [74.1101, 16.8121] },
+  { marketName: "Ichalkaranji", state: "Maharashtra", jadugar: 4520, jadugarPercent: 66.5, band: "Green", coordinates: [74.4605, 16.6912] },
+  { marketName: "Jaysingpur", state: "Maharashtra", jadugar: 2100, jadugarPercent: 48.8, band: "Yellow", coordinates: [74.5664, 16.7835] },
+  { marketName: "Kagal", state: "Maharashtra", jadugar: 1500, jadugarPercent: 38.5, band: "Orange", coordinates: [74.3154, 16.577] },
+  { marketName: "Gadhinglaj", state: "Maharashtra", jadugar: 980, jadugarPercent: 30.6, band: "Red", coordinates: [74.3501, 16.2229] },
+  { marketName: "Panhala", state: "Maharashtra", jadugar: 1800, jadugarPercent: 75.0, band: "Green", coordinates: [74.1101, 16.8121] },
 ];
