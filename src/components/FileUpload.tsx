@@ -150,7 +150,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           const town = String(row[townCol] || "").trim();
           if (!town) continue;
 
-          const state = stateCol ? String(r[stateCol] || "").trim() : "";
+          const state = stateCol ? String(row[stateCol] || "").trim() : "";
           const geoKey = state ? `${town}, ${state}` : town;
 
           const band = normalizeBand(String(row[bandCol!] || ""));
