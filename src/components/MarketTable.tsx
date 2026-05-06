@@ -22,8 +22,8 @@ export const MarketTable = ({ data }: MarketTableProps) => (
         {data.map((row) => (
           <TableRow key={row.marketName} className="hover:bg-muted/30 transition-colors">
             <TableCell className="font-medium text-sm text-card-foreground">{row.marketName}</TableCell>
-            <TableCell className="text-right text-sm">{row.jadugar.toLocaleString()}</TableCell>
-            <TableCell className="text-right text-sm">{row.jadugarPercent}%</TableCell>
+            <TableCell className="text-right text-sm">{(row.jadugar ?? 0).toLocaleString()}</TableCell>
+            <TableCell className="text-right text-sm">{row.jadugarPercent ?? 0}%</TableCell>
             <TableCell>
               <span
                 className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full"
