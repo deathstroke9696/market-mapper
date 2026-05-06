@@ -35,6 +35,14 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        band: {
+          green: "hsl(var(--band-green))",
+          yellow: "hsl(var(--band-yellow))",
+          orange: "hsl(var(--band-orange))",
+          red: "hsl(var(--band-red))",
+          blue: "hsl(var(--band-blue))",
+          grey: "hsl(var(--band-grey))",
+        },
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
