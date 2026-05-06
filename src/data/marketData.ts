@@ -2,6 +2,7 @@ export type Band = "Green" | "Yellow" | "Orange" | "Red" | "Blue" | "Grey";
 
 export interface MarketData {
   marketName: string;
+  state: string;
   jadugar: number;
   jadugarPercent: number;
   band: Band;
