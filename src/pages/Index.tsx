@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import IndiaMap from "@/components/IndiaMap";
 import { BandLegend } from "@/components/BandLegend";
 import { BandCountsLegend } from "@/components/BandCountsLegend";
+import { FilterSummaryOverlay } from "@/components/FilterSummaryOverlay";
 import { MarketTable } from "@/components/MarketTable";
 import { FileUpload } from "@/components/FileUpload";
 import { MapFilters } from "@/components/MapFilters";
@@ -99,6 +100,7 @@ const Index = () => {
               </div>
               <div className="h-[550px] relative" id={MAP_ELEMENT_ID}>
                 <IndiaMap data={filteredData} selectedStates={filters.state} />
+                <FilterSummaryOverlay filters={filters} />
                 <BandCountsLegend data={filteredData} />
               </div>
               {filters.state.length > 0 && (

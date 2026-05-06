@@ -110,3 +110,15 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+.leaflet-container-scoped .leaflet-pane,
+.leaflet-container-scoped .leaflet-top,
+.leaflet-container-scoped .leaflet-bottom {
+  z-index: 1 !important;
+}
+.leaflet-container-scoped .leaflet-tooltip {
+  z-index: 10 !important;
+}
+.leaflet-container-scoped .leaflet-popup {
+  z-index: 20 !important;
+}
