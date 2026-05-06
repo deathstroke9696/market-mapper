@@ -114,6 +114,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           keys.find((k) => k.trim().toLowerCase().includes(search.toLowerCase()));
 
         const townCol = findCol("town") || findCol("market") || keys[0];
+        const stateCol = findCol("state");
         // Important: find "Jadugar %" first, then find "Jadugar" excluding the % column
         const jadugarPctCol = findCol("jadugar %") || findCol("jadugar%");
         const jadugarCol = keys.find(
@@ -129,11 +130,16 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
 
         setProgress(`Parsed ${rows.length} rows. Geocoding towns...`);
 
-        // Collect unique towns
-        const allTowns = [...new Set(rows.map((r) => String(r[townCol] || "").trim()).filter(Boolean))];
+        // Build unique geocode keys as "town, state" to disambiguate duplicates
+        const townStateKeys = rows.map((r) => {
+          const town = String(r[townCol] || "").trim();
+          const state = stateCol ? String(r[stateCol] || "").trim() : "";
+          return state ? `${town}, ${state}` : town;
+        }).filter(Boolean);
+        const allTownKeys = [...new Set(townStateKeys)];
 
-        // Batch geocode all towns
-        const coordsMap = await batchGeocode(allTowns, (done, total) => {
+        // Batch geocode all towns (with state for disambiguation)
+        const coordsMap = await batchGeocode(allTownKeys, (done, total) => {
           setProgress(`Geocoding: ${done}/${total} towns...`);
         });
 
@@ -144,16 +150,19 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           const town = String(row[townCol] || "").trim();
           if (!town) continue;
 
+          const state = stateCol ? String(r[stateCol] || "").trim() : "";
+          const geoKey = state ? `${town}, ${state}` : town;
+
           const band = normalizeBand(String(row[bandCol!] || ""));
           if (!band) { skipped.push(town + " (invalid band)"); continue; }
 
-          const coords = coordsMap[town];
+          const coords = coordsMap[geoKey];
           if (!coords) { skipped.push(town + " (unknown location)"); continue; }
 
           const jadugar = jadugarCol ? Number(row[jadugarCol]) || 0 : 0;
           const jadugarPercent = jadugarPctCol ? Number(row[jadugarPctCol]) || 0 : 0;
 
-          parsed.push({ marketName: town, jadugar, jadugarPercent, band, coordinates: coords });
+          parsed.push({ marketName: town, state: state || "—", jadugar, jadugarPercent, band, coordinates: coords });
         }
 
         if (parsed.length === 0) {
