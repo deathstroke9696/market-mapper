@@ -5,11 +5,10 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
-import { MarketData, BAND_COLORS, Band } from "@/data/marketData";
+import { MarketData, BAND_COLORS } from "@/data/marketData";
 import { MapTooltip } from "./MapTooltip";
 
-const INDIA_TOPO_JSON =
-  "https://cdn.jsdelivr.net/npm/india-topojson@1.0.0/india.json";
+const INDIA_GEO_URL = "/india.geojson";
 
 interface IndiaMapProps {
   data: MarketData[];
@@ -22,11 +21,19 @@ const IndiaMap = memo(({ data }: IndiaMapProps) => {
     y: number;
   } | null>(null);
 
-  const dataMap = new Map(data.map((d) => [d.marketName.toLowerCase(), d]));
+  const dataMap = new Map<string, MarketData>();
+  data.forEach((d) => {
+    dataMap.set(d.marketName.toLowerCase(), d);
+  });
+
+  const normalize = (name: string) => name.toLowerCase().replace(/&/g, "and").replace(/\s+/g, " ").trim();
 
   const getMarketData = (geoName: string): MarketData | undefined => {
-    const name = geoName.toLowerCase();
-    return dataMap.get(name);
+    const n = normalize(geoName);
+    for (const [key, val] of dataMap) {
+      if (normalize(key) === n) return val;
+    }
+    return undefined;
   };
 
   const getFillColor = (geoName: string): string => {
@@ -46,10 +53,10 @@ const IndiaMap = memo(({ data }: IndiaMapProps) => {
         className="w-full h-full"
       >
         <ZoomableGroup>
-          <Geographies geography={INDIA_TOPO_JSON}>
+          <Geographies geography={INDIA_GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const name = geo.properties.NAME_1 || geo.properties.name || "";
+                const name = geo.properties.ST_NM || "";
                 return (
                   <Geography
                     key={geo.rsmKey}
@@ -77,13 +84,11 @@ const IndiaMap = memo(({ data }: IndiaMapProps) => {
                       }
                     }}
                     onMouseMove={(evt) => {
-                      if (tooltip) {
-                        setTooltip((prev) =>
-                          prev
-                            ? { ...prev, x: evt.clientX, y: evt.clientY }
-                            : null
-                        );
-                      }
+                      setTooltip((prev) =>
+                        prev
+                          ? { ...prev, x: evt.clientX, y: evt.clientY }
+                          : null
+                      );
                     }}
                     onMouseLeave={() => setTooltip(null)}
                   />
