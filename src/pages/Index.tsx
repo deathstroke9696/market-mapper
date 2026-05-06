@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import IndiaMap from "@/components/IndiaMap";
 import { BandLegend } from "@/components/BandLegend";
 import { MarketTable } from "@/components/MarketTable";
 import { FileUpload } from "@/components/FileUpload";
-import { MarketData } from "@/data/marketData";
+import { MapFilters } from "@/components/MapFilters";
+import { MarketData, Filters, emptyFilters, applyFilters } from "@/data/marketData";
 
 const Index = () => {
   const [marketData, setMarketData] = useState<MarketData[] | null>(null);
+  const [filters, setFilters] = useState<Filters>(emptyFilters());
+
+  const filteredData = useMemo(
+    () => (marketData ? applyFilters(marketData, filters) : []),
+    [marketData, filters]
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -18,7 +25,7 @@ const Index = () => {
       </header>
 
       <main className="max-w-[1400px] mx-auto px-6 py-6 space-y-6">
-        <FileUpload onDataLoaded={setMarketData} />
+        <FileUpload onDataLoaded={(data) => { setMarketData(data); setFilters(emptyFilters()); }} />
 
         {marketData && marketData.length > 0 && (
           <>
@@ -27,14 +34,20 @@ const Index = () => {
                 <h2 className="text-base font-semibold text-card-foreground">Market Band Map</h2>
                 <BandLegend />
               </div>
+              <div className="mb-4">
+                <MapFilters data={marketData} filters={filters} onChange={setFilters} />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Showing {filteredData.length} of {marketData.length} markets
+                </p>
+              </div>
               <div className="h-[550px]">
-                <IndiaMap data={marketData} />
+                <IndiaMap data={filteredData} />
               </div>
             </div>
 
             <div>
               <h2 className="text-base font-semibold text-foreground mb-3">Market Data</h2>
-              <MarketTable data={marketData} />
+              <MarketTable data={filteredData} />
             </div>
           </>
         )}
