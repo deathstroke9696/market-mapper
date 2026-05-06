@@ -9,7 +9,7 @@ const Index = () => {
       <header className="border-b border-border bg-card px-6 py-4">
         <h1 className="text-xl font-bold text-foreground">India Market Performance</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Hover over states to view Balanced, Volume & Percentage metrics
+          Hover over town markers to view Balanced, Volume & Percentage metrics
         </p>
       </header>
 
