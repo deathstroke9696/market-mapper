@@ -58,7 +58,7 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
             }}
           >
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-              <div style={{ minWidth: 180, fontFamily: "system-ui, sans-serif" }}>
+              <div style={{ minWidth: 160, fontFamily: "system-ui, sans-serif" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <span
                     style={{
@@ -78,18 +78,14 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
                     {market.band}
                   </span>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, fontSize: 11 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
                   <div>
-                    <div style={{ color: "#888" }}>Balanced</div>
-                    <div style={{ fontWeight: 600 }}>{market.balanced.toLocaleString()}</div>
+                    <div style={{ color: "#888" }}>Jadugar</div>
+                    <div style={{ fontWeight: 600 }}>{market.jadugar.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div style={{ color: "#888" }}>Volume</div>
-                    <div style={{ fontWeight: 600 }}>{market.volume.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: "#888" }}>%</div>
-                    <div style={{ fontWeight: 600 }}>{market.percentage}%</div>
+                    <div style={{ color: "#888" }}>Jadugar %</div>
+                    <div style={{ fontWeight: 600 }}>{market.jadugarPercent}%</div>
                   </div>
                 </div>
               </div>
