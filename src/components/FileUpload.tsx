@@ -76,7 +76,7 @@ const batchGeocode = async (
     results[needsGeocode[i]] = await geocodeTown(needsGeocode[i]);
     onProgress(towns.length - needsGeocode.length + i + 1, towns.length);
     if (i < needsGeocode.length - 1) {
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 1100));
     }
   }
 
