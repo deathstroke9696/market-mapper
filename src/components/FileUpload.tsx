@@ -18,23 +18,36 @@ const normalizeBand = (val: string): Band | null => {
 
 const geocodeCache: Record<string, [number, number] | null> = {};
 
-const geocodeTown = async (town: string): Promise<[number, number] | null> => {
+const geocodeTown = async (town: string, retries = 2): Promise<[number, number] | null> => {
   const key = town.trim().toLowerCase();
   if (TOWN_COORDINATES[key]) return TOWN_COORDINATES[key];
   if (key in geocodeCache) return geocodeCache[key];
 
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(town + ", India")}&format=json&limit=1`,
-      { headers: { "User-Agent": "MarketMapTool/1.0" } }
-    );
-    const data = await res.json();
-    if (data && data.length > 0) {
-      const coords: [number, number] = [parseFloat(data[0].lon), parseFloat(data[0].lat)];
-      geocodeCache[key] = coords;
-      return coords;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(town + ", India")}&format=json&limit=1`,
+        { headers: { "User-Agent": "MarketMapTool/1.0" } }
+      );
+      if (res.status === 429) {
+        // Rate limited – wait and retry
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        continue;
+      }
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const coords: [number, number] = [parseFloat(data[0].lon), parseFloat(data[0].lat)];
+        geocodeCache[key] = coords;
+        return coords;
+      }
+      break; // Got response but no results
+    } catch {
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 1500));
+        continue;
+      }
     }
-  } catch { /* ignore */ }
+  }
   geocodeCache[key] = null;
   return null;
 };
