@@ -4,7 +4,7 @@ import { BandLegend } from "@/components/BandLegend";
 import { MarketTable } from "@/components/MarketTable";
 import { FileUpload } from "@/components/FileUpload";
 import { MapFilters } from "@/components/MapFilters";
-import { MarketData, Filters, emptyFilters, applyFilters } from "@/data/marketData";
+import { MarketData, Filters, emptyFilters, applyFilters, STATE_COLORS } from "@/data/marketData";
 
 const Index = () => {
   const [marketData, setMarketData] = useState<MarketData[] | null>(null);
@@ -43,6 +43,20 @@ const Index = () => {
               <div className="h-[550px]">
                 <IndiaMap data={filteredData} selectedStates={filters.state} />
               </div>
+              {filters.state.length > 0 && (
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  <span className="text-xs text-muted-foreground font-medium">State colors:</span>
+                  {filters.state.map((s, i) => (
+                    <div key={s} className="flex items-center gap-1.5">
+                      <span
+                        className="w-3 h-3 rounded-sm border border-border"
+                        style={{ backgroundColor: STATE_COLORS[i % STATE_COLORS.length], opacity: 0.7 }}
+                      />
+                      <span className="text-xs text-foreground">{s}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
