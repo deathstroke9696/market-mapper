@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet";
+import { useEffect, useState, useMemo } from "react";
+import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { MarketData, BAND_COLORS } from "@/data/marketData";
 
 interface IndiaMapProps {
   data: MarketData[];
+  selectedStates?: string[];
 }
+
+const GEOJSON_URL =
+  "https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson";
 
 const FitBounds = ({ data }: { data: MarketData[] }) => {
   const map = useMap();
@@ -22,8 +26,42 @@ const FitBounds = ({ data }: { data: MarketData[] }) => {
   return null;
 };
 
-const IndiaMap = ({ data }: IndiaMapProps) => {
+const normalizeStateName = (name: string) =>
+  name.toLowerCase().replace(/[^a-z]/g, "");
+
+const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
   const [activeMarket, setActiveMarket] = useState<string | null>(null);
+  const [geoData, setGeoData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch(GEOJSON_URL)
+      .then((r) => r.json())
+      .then(setGeoData)
+      .catch(() => {});
+  }, []);
+
+  const filteredGeo = useMemo(() => {
+    if (!geoData || selectedStates.length === 0) return null;
+    const normalizedSelected = selectedStates.map(normalizeStateName);
+    const filtered = {
+      ...geoData,
+      features: geoData.features.filter((f: any) => {
+        const name = normalizeStateName(f.properties?.NAME_1 || f.properties?.name || f.properties?.NAME || "");
+        return normalizedSelected.some(
+          (sel) => name.includes(sel) || sel.includes(name)
+        );
+      }),
+    };
+    return filtered.features.length > 0 ? filtered : null;
+  }, [geoData, selectedStates]);
+
+  const geoStyle = () => ({
+    color: "hsl(210, 70%, 55%)",
+    weight: 3,
+    fillColor: "hsl(210, 70%, 55%)",
+    fillOpacity: 0.1,
+    dashArray: "6 3",
+  });
 
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
@@ -41,6 +79,13 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {filteredGeo && (
+          <GeoJSON
+            key={selectedStates.join(",")}
+            data={filteredGeo}
+            style={geoStyle}
+          />
+        )}
         {data.map((market, idx) => (
           <CircleMarker
             key={`${market.marketName}-${idx}`}
