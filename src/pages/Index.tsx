@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import IndiaMap from "@/components/IndiaMap";
 import { BandLegend } from "@/components/BandLegend";
 import { BandCountsLegend } from "@/components/BandCountsLegend";
+import { FilterSummaryOverlay } from "@/components/FilterSummaryOverlay";
 import { MarketTable } from "@/components/MarketTable";
 import { FileUpload } from "@/components/FileUpload";
 import { MapFilters } from "@/components/MapFilters";
