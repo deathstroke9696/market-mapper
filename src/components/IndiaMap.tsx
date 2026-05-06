@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { MarketData, BAND_COLORS } from "@/data/marketData";
+import { MarketData, BAND_COLORS, STATE_COLORS } from "@/data/marketData";
 
 interface IndiaMapProps {
   data: MarketData[];
@@ -40,9 +40,15 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
       .catch(() => {});
   }, []);
 
-  const filteredGeo = useMemo(() => {
-    if (!geoData || selectedStates.length === 0) return null;
+  // Build per-feature color map based on selected state order
+  const { filteredGeo, stateColorMap } = useMemo(() => {
+    if (!geoData || selectedStates.length === 0) return { filteredGeo: null, stateColorMap: {} as Record<string, string> };
     const normalizedSelected = selectedStates.map(normalizeStateName);
+    const colorMap: Record<string, string> = {};
+    normalizedSelected.forEach((s, i) => {
+      colorMap[s] = STATE_COLORS[i % STATE_COLORS.length];
+    });
+
     const filtered = {
       ...geoData,
       features: geoData.features.filter((f: any) => {
@@ -52,16 +58,25 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
         );
       }),
     };
-    return filtered.features.length > 0 ? filtered : null;
+    return {
+      filteredGeo: filtered.features.length > 0 ? filtered : null,
+      stateColorMap: colorMap,
+    };
   }, [geoData, selectedStates]);
 
-  const geoStyle = () => ({
-    color: "hsl(210, 70%, 55%)",
-    weight: 3,
-    fillColor: "hsl(210, 70%, 55%)",
-    fillOpacity: 0.1,
-    dashArray: "6 3",
-  });
+  const geoStyle = (feature: any) => {
+    const name = normalizeStateName(feature?.properties?.NAME_1 || feature?.properties?.name || feature?.properties?.NAME || "");
+    const normalizedSelected = selectedStates.map(normalizeStateName);
+    const matched = normalizedSelected.find((sel) => name.includes(sel) || sel.includes(name));
+    const color = matched ? stateColorMap[matched] || STATE_COLORS[0] : STATE_COLORS[0];
+    return {
+      color,
+      weight: 3,
+      fillColor: color,
+      fillOpacity: 0.15,
+      dashArray: "6 3",
+    };
+  };
 
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
