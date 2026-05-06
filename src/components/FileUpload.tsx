@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Download } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Upload, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
@@ -329,7 +330,81 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           )}
         </div>
       </div>
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end gap-2 mt-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  let cached: Record<string, [number, number]>;
+                  try {
+                    cached = loadCacheFromStorage();
+                  } catch {
+                    toast({ title: "Error", description: "Failed to read geocoding cache.", variant: "destructive" });
+                    return;
+                  }
+                  const cacheEntries = Object.entries(cached).filter(
+                    ([, v]) => v != null && Array.isArray(v) && v.length === 2
+                  );
+                  if (cacheEntries.length === 0) {
+                    toast({ title: "Nothing to export", description: "No cached coordinates to export — upload data first." });
+                    return;
+                  }
+
+                  const existing = { ...TOWN_COORDINATES };
+                  let newCount = 0;
+                  for (const [key, coords] of cacheEntries) {
+                    if (!(key in existing)) newCount++;
+                    existing[key] = [
+                      parseFloat(coords[0].toFixed(4)),
+                      parseFloat(coords[1].toFixed(4)),
+                    ];
+                  }
+                  const total = Object.keys(existing).length;
+                  const sorted = Object.keys(existing).sort();
+
+                  const lines = sorted.map(
+                    (k) => `  "${k}": [${existing[k][0]}, ${existing[k][1]}],`
+                  );
+                  const output = `export const TOWN_COORDINATES: Record<string, [number, number]> = {\n${lines.join("\n")}\n};\n`;
+
+                  const now = new Date();
+                  const pad = (n: number) => String(n).padStart(2, "0");
+                  const filename = `town-coordinates-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.ts`;
+
+                  const blob = new Blob([output], { type: "text/plain" });
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = filename;
+                  link.click();
+                  URL.revokeObjectURL(link.href);
+
+                  let clipboardOk = false;
+                  try {
+                    await navigator.clipboard.writeText(output);
+                    clipboardOk = true;
+                  } catch {}
+
+                  const dupCount = cacheEntries.length - newCount;
+                  toast({
+                    title: `Exported ${total} coordinates (${newCount} new${dupCount > 0 ? `, ${dupCount} updated` : ""})`,
+                    description: clipboardOk
+                      ? `Copied to clipboard and downloaded as ${filename}. Paste into src/data/marketData.ts to make permanent.`
+                      : `Downloaded as ${filename}. Paste into src/data/marketData.ts to make permanent. (Clipboard unavailable)`,
+                  });
+                }}
+              >
+                <Download className="w-3.5 h-3.5 mr-1" />
+                Export cache
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[260px] text-xs">
+              Export your geocoded cache as TypeScript code to permanently add these towns to the hardcoded lookup, eliminating future geocoding for these towns.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Button
           variant="secondary"
           size="sm"
