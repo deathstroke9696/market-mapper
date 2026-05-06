@@ -9,11 +9,28 @@ export interface MarketData {
   goiDistrict: string;
   brand: string;
   segment: string;
+  trendBelt: string;
   vol: number;
   volPercent: number;
   band: Band;
   coordinates: [number, number]; // [longitude, latitude]
 }
+
+// Professional, visually distinct color palette for state highlights
+export const STATE_COLORS: string[] = [
+  "hsl(210, 70%, 50%)",  // Blue
+  "hsl(340, 65%, 50%)",  // Rose
+  "hsl(160, 55%, 42%)",  // Teal
+  "hsl(270, 55%, 55%)",  // Purple
+  "hsl(30, 80%, 50%)",   // Orange
+  "hsl(190, 70%, 42%)",  // Cyan
+  "hsl(45, 85%, 48%)",   // Amber
+  "hsl(0, 60%, 50%)",    // Red
+  "hsl(120, 40%, 45%)",  // Green
+  "hsl(300, 45%, 50%)",  // Magenta
+  "hsl(220, 50%, 60%)",  // Slate blue
+  "hsl(15, 70%, 55%)",   // Coral
+];
 
 export const BAND_COLORS: Record<Band, string> = {
   Green: "hsl(145, 60%, 45%)",
@@ -32,6 +49,7 @@ export const FILTER_FIELDS = [
   { key: "goiDistrict" as const, label: "GOI District" },
   { key: "brand" as const, label: "Brand" },
   { key: "segment" as const, label: "Segment" },
+  { key: "trendBelt" as const, label: "Trend Belt" },
 ];
 
 export type FilterKey = typeof FILTER_FIELDS[number]["key"];
@@ -40,7 +58,7 @@ export type Filters = Record<FilterKey, string[]>;
 
 export const emptyFilters = (): Filters => ({
   branch: [], state: [], section: [], circle: [],
-  goiDistrict: [], brand: [], segment: [],
+  goiDistrict: [], brand: [], segment: [], trendBelt: [],
 });
 
 export const applyFilters = (data: MarketData[], filters: Filters): MarketData[] =>
