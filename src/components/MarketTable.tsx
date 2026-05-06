@@ -13,6 +13,7 @@ export const MarketTable = ({ data }: MarketTableProps) => (
       <TableHeader>
         <TableRow className="bg-muted/50">
           <TableHead className="text-muted-foreground font-semibold text-xs">Town</TableHead>
+          <TableHead className="text-muted-foreground font-semibold text-xs">State</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs text-right">Jadugar</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs text-right">Jadugar %</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">Band</TableHead>
@@ -22,6 +23,7 @@ export const MarketTable = ({ data }: MarketTableProps) => (
         {data.map((row) => (
           <TableRow key={row.marketName} className="hover:bg-muted/30 transition-colors">
             <TableCell className="font-medium text-sm text-card-foreground">{row.marketName}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{row.state}</TableCell>
             <TableCell className="text-right text-sm">{(row.jadugar ?? 0).toLocaleString()}</TableCell>
             <TableCell className="text-right text-sm">{row.jadugarPercent ?? 0}%</TableCell>
             <TableCell>

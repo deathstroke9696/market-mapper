@@ -67,6 +67,7 @@ const IndiaMap = ({ data }: IndiaMapProps) => {
                     }}
                   />
                   <strong style={{ fontSize: 13 }}>{market.marketName}</strong>
+                  <span style={{ fontSize: 10, color: "#888" }}>{market.state}</span>
                   <span
                     style={{
                       fontSize: 10, fontWeight: 600, padding: "2px 8px",
