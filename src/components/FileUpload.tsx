@@ -328,5 +328,20 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         )}
       </div>
     </div>
+    <div className="flex justify-end mt-2">
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => {
+          localStorage.removeItem(GEOCODE_CACHE_KEY);
+          Object.keys(persistentCache).forEach((k) => delete persistentCache[k]);
+          sessionNullCache.clear();
+          toast({ title: "Cache cleared", description: "Geocoding cache has been reset." });
+        }}
+      >
+        <Trash2 className="w-3.5 h-3.5 mr-1" />
+        Clear geocoding cache
+      </Button>
+    </div>
   );
 };
