@@ -194,9 +194,11 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         }
 
         if (skipped.length > 0) {
+          console.warn("Skipped markets:", skipped);
           toast({
-            title: `${skipped.length} rows skipped`,
+            title: `⚠️ ${skipped.length} rows skipped`,
             description: skipped.slice(0, 5).join(", ") + (skipped.length > 5 ? ` and ${skipped.length - 5} more...` : ""),
+            variant: "destructive",
           });
         }
 
