@@ -6,7 +6,7 @@ export interface MarketData {
   volume: number;
   percentage: number;
   band: Band;
-  coordinates: [number, number]; // [longitude, latitude]
+  coordinates: [number, number]; // [longitude, latitude] - used for map centering
 }
 
 export const BAND_COLORS: Record<Band, string> = {
