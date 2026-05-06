@@ -1,135 +1,101 @@
-import { useEffect, useState, useMemo } from "react";
-import { MapContainer, TileLayer, GeoJSON, Tooltip, useMap } from "react-leaflet";
-import L from "leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { MarketData, BAND_COLORS } from "@/data/marketData";
-
-const DISTRICTS_URL = "/india_districts.geojson";
 
 interface IndiaMapProps {
   data: MarketData[];
 }
 
-const FitIndia = () => {
+const FitBounds = ({ data }: { data: MarketData[] }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView([22.5, 82], 5);
-  }, [map]);
+    if (data.length === 0) return;
+    const lats = data.map((d) => d.coordinates[1]);
+    const lngs = data.map((d) => d.coordinates[0]);
+    const bounds: [[number, number], [number, number]] = [
+      [Math.min(...lats) - 0.15, Math.min(...lngs) - 0.15],
+      [Math.max(...lats) + 0.15, Math.max(...lngs) + 0.15],
+    ];
+    map.fitBounds(bounds);
+  }, [map, data]);
   return null;
 };
 
 const IndiaMap = ({ data }: IndiaMapProps) => {
-  const [geoData, setGeoData] = useState<GeoJSON.FeatureCollection | null>(null);
-
-  const dataMap = useMemo(() => {
-    const m = new Map<string, MarketData>();
-    data.forEach((d) => m.set(d.marketName.toLowerCase(), d));
-    return m;
-  }, [data]);
-
-  useEffect(() => {
-    fetch(DISTRICTS_URL)
-      .then((res) => res.json())
-      .then((json) => setGeoData(json))
-      .catch(console.error);
-  }, []);
-
-  const styleFeature = (feature: GeoJSON.Feature | undefined) => {
-    if (!feature) return {};
-    const marketName = (feature.properties as any)?.marketName || "";
-    const market = dataMap.get(marketName.toLowerCase());
-    const color = market ? BAND_COLORS[market.band] : "transparent";
-    return {
-      fillColor: color,
-      fillOpacity: 0.5,
-      color: market ? BAND_COLORS[market.band] : "transparent",
-      weight: 2.5,
-      opacity: 0.9,
-    };
-  };
-
-  const onEachFeature = (feature: GeoJSON.Feature, layer: L.Layer) => {
-    const marketName = (feature.properties as any)?.marketName || "";
-    const market = dataMap.get(marketName.toLowerCase());
-    if (!market) return;
-
-    const tooltipContent = `
-      <div style="min-width:180px;font-family:system-ui,sans-serif;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-          <span style="width:10px;height:10px;border-radius:50%;background:${BAND_COLORS[market.band]};display:inline-block;"></span>
-          <strong style="font-size:13px;">${market.marketName}</strong>
-          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;margin-left:auto;background:${BAND_COLORS[market.band]}22;color:${BAND_COLORS[market.band]};">${market.band}</span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px;">
-          <div><div style="color:#888;">Balanced</div><div style="font-weight:600;">${market.balanced.toLocaleString()}</div></div>
-          <div><div style="color:#888;">Volume</div><div style="font-weight:600;">${market.volume.toLocaleString()}</div></div>
-          <div><div style="color:#888;">%</div><div style="font-weight:600;">${market.percentage}%</div></div>
-        </div>
-      </div>
-    `;
-
-    (layer as L.Path).bindTooltip(tooltipContent, {
-      direction: "top",
-      offset: [0, -10],
-      opacity: 1,
-      className: "market-tooltip",
-    });
-
-    (layer as L.Path).on({
-      mouseover: (e) => {
-        const target = e.target as L.Path;
-        target.setStyle({
-          weight: 4,
-          fillOpacity: 0.7,
-        });
-        target.bringToFront();
-      },
-      mouseout: (e) => {
-        const target = e.target as L.Path;
-        target.setStyle({
-          weight: 2.5,
-          fillOpacity: 0.5,
-        });
-      },
-    });
-  };
+  const [activeMarket, setActiveMarket] = useState<string | null>(null);
 
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
-      <style>{`
-        .market-tooltip {
-          background: white !important;
-          border: 1px solid #e2e8f0 !important;
-          border-radius: 8px !important;
-          padding: 10px 14px !important;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
-        }
-        .market-tooltip::before {
-          border-top-color: white !important;
-        }
-      `}</style>
       <MapContainer
-        center={[22.5, 82]}
-        zoom={5}
+        center={[16.5, 74.4]}
+        zoom={10}
         minZoom={4}
         maxZoom={18}
         scrollWheelZoom={true}
         className="w-full h-full"
         style={{ background: "hsl(220, 15%, 94%)" }}
       >
-        <FitIndia />
+        <FitBounds data={data} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {geoData && (
-          <GeoJSON
-            key="districts"
-            data={geoData}
-            style={styleFeature}
-            onEachFeature={onEachFeature}
-          />
-        )}
+        {data.map((market) => (
+          <CircleMarker
+            key={market.marketName}
+            center={[market.coordinates[1], market.coordinates[0]]}
+            radius={activeMarket === market.marketName ? 12 : 8}
+            pathOptions={{
+              fillColor: BAND_COLORS[market.band],
+              fillOpacity: 0.85,
+              color: "#fff",
+              weight: 2.5,
+            }}
+            eventHandlers={{
+              mouseover: () => setActiveMarket(market.marketName),
+              mouseout: () => setActiveMarket(null),
+            }}
+          >
+            <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+              <div style={{ minWidth: 180, fontFamily: "system-ui, sans-serif" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <span
+                    style={{
+                      width: 10, height: 10, borderRadius: "50%",
+                      background: BAND_COLORS[market.band], display: "inline-block",
+                    }}
+                  />
+                  <strong style={{ fontSize: 13 }}>{market.marketName}</strong>
+                  <span
+                    style={{
+                      fontSize: 10, fontWeight: 600, padding: "2px 8px",
+                      borderRadius: 99, marginLeft: "auto",
+                      background: BAND_COLORS[market.band] + "22",
+                      color: BAND_COLORS[market.band],
+                    }}
+                  >
+                    {market.band}
+                  </span>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, fontSize: 11 }}>
+                  <div>
+                    <div style={{ color: "#888" }}>Balanced</div>
+                    <div style={{ fontWeight: 600 }}>{market.balanced.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: "#888" }}>Volume</div>
+                    <div style={{ fontWeight: 600 }}>{market.volume.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: "#888" }}>%</div>
+                    <div style={{ fontWeight: 600 }}>{market.percentage}%</div>
+                  </div>
+                </div>
+              </div>
+            </Tooltip>
+          </CircleMarker>
+        ))}
       </MapContainer>
     </div>
   );
