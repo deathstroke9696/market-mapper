@@ -3,8 +3,14 @@ export type Band = "Green" | "Yellow" | "Orange" | "Red" | "Blue" | "Grey";
 export interface MarketData {
   marketName: string;
   state: string;
-  jadugar: number;
-  jadugarPercent: number;
+  branch: string;
+  circle: string;
+  section: string;
+  goiDistrict: string;
+  brand: string;
+  segment: string;
+  vol: number;
+  volPercent: number;
   band: Band;
   coordinates: [number, number]; // [longitude, latitude]
 }
@@ -17,6 +23,32 @@ export const BAND_COLORS: Record<Band, string> = {
   Blue: "hsl(210, 70%, 55%)",
   Grey: "hsl(220, 10%, 70%)",
 };
+
+export const FILTER_FIELDS = [
+  { key: "branch" as const, label: "Branch" },
+  { key: "state" as const, label: "State" },
+  { key: "section" as const, label: "Section" },
+  { key: "circle" as const, label: "Circle" },
+  { key: "goiDistrict" as const, label: "GOI District" },
+  { key: "brand" as const, label: "Brand" },
+  { key: "segment" as const, label: "Segment" },
+];
+
+export type FilterKey = typeof FILTER_FIELDS[number]["key"];
+
+export type Filters = Record<FilterKey, string[]>;
+
+export const emptyFilters = (): Filters => ({
+  branch: [], state: [], section: [], circle: [],
+  goiDistrict: [], brand: [], segment: [],
+});
+
+export const applyFilters = (data: MarketData[], filters: Filters): MarketData[] =>
+  data.filter((row) =>
+    FILTER_FIELDS.every(({ key }) =>
+      filters[key].length === 0 || filters[key].includes(row[key])
+    )
+  );
 
 // Town coordinates lookup for geocoding
 export const TOWN_COORDINATES: Record<string, [number, number]> = {
@@ -74,10 +106,4 @@ export const TOWN_COORDINATES: Record<string, [number, number]> = {
   "goa": [73.8278, 15.4909],
 };
 
-export const sampleMarketData: MarketData[] = [
-  { marketName: "Ichalkaranji", state: "Maharashtra", jadugar: 4520, jadugarPercent: 66.5, band: "Green", coordinates: [74.4605, 16.6912] },
-  { marketName: "Jaysingpur", state: "Maharashtra", jadugar: 2100, jadugarPercent: 48.8, band: "Yellow", coordinates: [74.5664, 16.7835] },
-  { marketName: "Kagal", state: "Maharashtra", jadugar: 1500, jadugarPercent: 38.5, band: "Orange", coordinates: [74.3154, 16.577] },
-  { marketName: "Gadhinglaj", state: "Maharashtra", jadugar: 980, jadugarPercent: 30.6, band: "Red", coordinates: [74.3501, 16.2229] },
-  { marketName: "Panhala", state: "Maharashtra", jadugar: 1800, jadugarPercent: 75.0, band: "Green", coordinates: [74.1101, 16.8121] },
-];
+export const sampleMarketData: MarketData[] = [];

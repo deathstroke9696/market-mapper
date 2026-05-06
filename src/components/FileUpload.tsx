@@ -16,16 +16,11 @@ const normalizeBand = (val: string): Band | null => {
   return found ?? null;
 };
 
-// In-memory geocode cache to avoid repeat API calls
 const geocodeCache: Record<string, [number, number] | null> = {};
 
 const geocodeTown = async (town: string): Promise<[number, number] | null> => {
   const key = town.trim().toLowerCase();
-
-  // Check hardcoded first
   if (TOWN_COORDINATES[key]) return TOWN_COORDINATES[key];
-
-  // Check cache
   if (key in geocodeCache) return geocodeCache[key];
 
   try {
@@ -39,14 +34,11 @@ const geocodeTown = async (town: string): Promise<[number, number] | null> => {
       geocodeCache[key] = coords;
       return coords;
     }
-  } catch {
-    // ignore geocode errors
-  }
+  } catch { /* ignore */ }
   geocodeCache[key] = null;
   return null;
 };
 
-// Rate-limited batch geocoding
 const batchGeocode = async (
   towns: string[],
   onProgress: (done: number, total: number) => void
@@ -54,7 +46,6 @@ const batchGeocode = async (
   const results: Record<string, [number, number] | null> = {};
   const needsGeocode: string[] = [];
 
-  // First pass: resolve from hardcoded + cache
   for (const town of towns) {
     const key = town.trim().toLowerCase();
     if (TOWN_COORDINATES[key]) {
@@ -68,17 +59,20 @@ const batchGeocode = async (
 
   onProgress(towns.length - needsGeocode.length, towns.length);
 
-  // Batch geocode with rate limiting (2 per second to be respectful)
   for (let i = 0; i < needsGeocode.length; i++) {
     results[needsGeocode[i]] = await geocodeTown(needsGeocode[i]);
     onProgress(towns.length - needsGeocode.length + i + 1, towns.length);
     if (i < needsGeocode.length - 1) {
-      await new Promise((r) => setTimeout(r, 500)); // 2 req/sec
+      await new Promise((r) => setTimeout(r, 500));
     }
   }
 
   return results;
 };
+
+// Clean town name: remove suffixes like (M), (M CORP.), etc.
+const cleanTownName = (raw: string): string =>
+  raw.replace(/\s*\(.*?\)\s*/g, "").replace(/\u00a0/g, " ").trim();
 
 export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
   const [dragging, setDragging] = useState(false);
@@ -95,8 +89,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
 
       try {
         const buffer = await file.arrayBuffer();
-        const data = new Uint8Array(buffer);
-        const workbook = XLSX.read(data, { type: "array" });
+        const workbook = XLSX.read(new Uint8Array(buffer), { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet);
 
@@ -106,21 +99,25 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           return;
         }
 
-        // Find columns (case-insensitive, exact match priority)
-        const firstRow = rows[0];
-        const keys = Object.keys(firstRow);
+        const keys = Object.keys(rows[0]);
         const findCol = (search: string) =>
           keys.find((k) => k.trim().toLowerCase() === search.toLowerCase()) ||
           keys.find((k) => k.trim().toLowerCase().includes(search.toLowerCase()));
 
         const townCol = findCol("town") || findCol("market") || keys[0];
         const stateCol = findCol("state");
-        // Important: find "Jadugar %" first, then find "Jadugar" excluding the % column
-        const jadugarPctCol = findCol("jadugar %") || findCol("jadugar%");
-        const jadugarCol = keys.find(
-          (k) => k.trim().toLowerCase().includes("jadugar") && k !== jadugarPctCol
-        );
         const bandCol = findCol("band");
+        const branchCol = findCol("branch");
+        const circleCol = findCol("circle");
+        const sectionCol = findCol("section");
+        const goiDistCol = findCol("goi district") || findCol("goi_district") || findCol("district");
+        const brandCol = findCol("brand");
+        const segmentCol = findCol("segment");
+        // Vol columns: find "%" first, then "vol" excluding %
+        const volPctCol = keys.find((k) => k.trim() === "%") || findCol("vol %") || findCol("vol%");
+        const volCol = keys.find(
+          (k) => k.trim().toLowerCase().includes("vol") && k !== volPctCol
+        ) || keys.find((k) => k.trim().toLowerCase() === "vol");
 
         if (!townCol || !bandCol) {
           toast({ title: "Invalid format", description: "File must have Town and Band columns.", variant: "destructive" });
@@ -130,15 +127,13 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
 
         setProgress(`Parsed ${rows.length} rows. Geocoding towns...`);
 
-        // Build unique geocode keys as "town, state" to disambiguate duplicates
         const townStateKeys = rows.map((r) => {
-          const town = String(r[townCol] || "").trim();
+          const town = cleanTownName(String(r[townCol] || ""));
           const state = stateCol ? String(r[stateCol] || "").trim() : "";
           return state ? `${town}, ${state}` : town;
         }).filter(Boolean);
         const allTownKeys = [...new Set(townStateKeys)];
 
-        // Batch geocode all towns (with state for disambiguation)
         const coordsMap = await batchGeocode(allTownKeys, (done, total) => {
           setProgress(`Geocoding: ${done}/${total} towns...`);
         });
@@ -147,7 +142,8 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         const skipped: string[] = [];
 
         for (const row of rows) {
-          const town = String(row[townCol] || "").trim();
+          const rawTown = String(row[townCol] || "").trim();
+          const town = cleanTownName(rawTown);
           if (!town) continue;
 
           const state = stateCol ? String(row[stateCol] || "").trim() : "";
@@ -159,14 +155,27 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           const coords = coordsMap[geoKey];
           if (!coords) { skipped.push(town + " (unknown location)"); continue; }
 
-          const jadugar = jadugarCol ? Number(row[jadugarCol]) || 0 : 0;
-          const jadugarPercent = jadugarPctCol ? Number(row[jadugarPctCol]) || 0 : 0;
+          const vol = volCol ? Number(row[volCol]) || 0 : 0;
+          const volPercent = volPctCol ? Number(row[volPctCol]) || 0 : 0;
 
-          parsed.push({ marketName: town, state: state || "—", jadugar, jadugarPercent, band, coordinates: coords });
+          parsed.push({
+            marketName: town,
+            state: state || "—",
+            branch: branchCol ? String(row[branchCol] || "").trim() : "—",
+            circle: circleCol ? String(row[circleCol] || "").trim() : "—",
+            section: sectionCol ? String(row[sectionCol] || "").trim() : "—",
+            goiDistrict: goiDistCol ? String(row[goiDistCol] || "").trim() : "—",
+            brand: brandCol ? String(row[brandCol] || "").trim() : "—",
+            segment: segmentCol ? String(row[segmentCol] || "").trim() : "—",
+            vol,
+            volPercent,
+            band,
+            coordinates: coords,
+          });
         }
 
         if (parsed.length === 0) {
-          toast({ title: "No valid data", description: "Could not match any towns. Check town names.", variant: "destructive" });
+          toast({ title: "No valid data", description: "Could not match any towns.", variant: "destructive" });
           setLoading(false);
           return;
         }
@@ -232,11 +241,9 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
           </div>
         ) : (
           <div>
-            <p className="text-sm font-medium text-foreground">
-              Drag & drop your Excel file here
-            </p>
+            <p className="text-sm font-medium text-foreground">Drag & drop your Excel file here</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Town | Jadugar | Jadugar % | Band</span>
+              Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Circle | Section | GOI District | Brand | Segment | Town | Vol | % | Band | State</span>
             </p>
           </div>
         )}
