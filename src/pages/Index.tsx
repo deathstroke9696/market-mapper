@@ -1,6 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
 import { Camera, Presentation } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import IndiaMap from "@/components/IndiaMap";
 import { BandLegend } from "@/components/BandLegend";
 import { BandCountsLegend } from "@/components/BandCountsLegend";
@@ -20,6 +22,7 @@ const Index = () => {
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [pptOpen, setPptOpen] = useState(false);
   const [snipping, setSnipping] = useState(false);
+  const [alwaysShowLabels, setAlwaysShowLabels] = useState(false);
 
   const filteredData = useMemo(
     () => (marketData ? applyFilters(marketData, filters) : []),
