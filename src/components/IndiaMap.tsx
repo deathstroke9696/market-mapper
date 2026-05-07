@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap, useMapEvents } from "react-leaflet";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap, useMapEvents, Marker } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MarketData, BAND_COLORS, STATE_COLORS } from "@/data/marketData";
 
@@ -11,6 +12,12 @@ interface IndiaMapProps {
 
 const GEOJSON_URL =
   "https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson";
+
+const INVISIBLE_ICON = L.divIcon({
+  className: "",
+  iconSize: [0, 0],
+  iconAnchor: [0, 0],
+});
 
 const FitBounds = ({ data }: { data: MarketData[] }) => {
   const map = useMap();
@@ -49,6 +56,8 @@ const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: India
 
   const showLabels = alwaysShowLabels || (zoom >= 8 && data.length <= 80);
 
+  const handleZoomChange = useCallback((z: number) => setZoom(z), []);
+
   useEffect(() => {
     fetch(GEOJSON_URL)
       .then((r) => r.json())
@@ -56,7 +65,6 @@ const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: India
       .catch(() => {});
   }, []);
 
-  // Build per-feature color map based on selected state order
   const { filteredGeo, stateColorMap } = useMemo(() => {
     if (!geoData || selectedStates.length === 0) return { filteredGeo: null, stateColorMap: {} as Record<string, string> };
     const normalizedSelected = selectedStates.map(normalizeStateName);
@@ -106,7 +114,7 @@ const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: India
         style={{ background: "hsl(220, 15%, 94%)" }}
       >
         <FitBounds data={data} />
-        <MapEvents onZoomChange={setZoom} />
+        <MapEvents onZoomChange={handleZoomChange} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -134,16 +142,6 @@ const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: India
               mouseout: () => setActiveMarket(null),
             }}
           >
-            {showLabels && (
-              <Tooltip
-                permanent
-                direction="right"
-                offset={[8, -4]}
-                className="market-label"
-              >
-                {market.marketName}
-              </Tooltip>
-            )}
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
               <div style={{ minWidth: 160, fontFamily: "system-ui, sans-serif" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
@@ -179,6 +177,23 @@ const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: India
               </div>
             </Tooltip>
           </CircleMarker>
+        ))}
+        {showLabels && data.map((market, idx) => (
+          <Marker
+            key={`label-${market.marketName}-${idx}`}
+            position={[market.coordinates[1], market.coordinates[0]]}
+            icon={INVISIBLE_ICON}
+            interactive={false}
+          >
+            <Tooltip
+              permanent
+              direction="right"
+              offset={[8, -4]}
+              className="market-label"
+            >
+              {market.marketName}
+            </Tooltip>
+          </Marker>
         ))}
       </MapContainer>
     </div>
