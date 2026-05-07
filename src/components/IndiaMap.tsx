@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { MarketData, BAND_COLORS, STATE_COLORS } from "@/data/marketData";
 
 interface IndiaMapProps {
   data: MarketData[];
   selectedStates?: string[];
+  alwaysShowLabels?: boolean;
 }
 
 const GEOJSON_URL =
@@ -26,12 +27,27 @@ const FitBounds = ({ data }: { data: MarketData[] }) => {
   return null;
 };
 
+const MapEvents = ({ onZoomChange }: { onZoomChange: (zoom: number) => void }) => {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+  useEffect(() => {
+    onZoomChange(map.getZoom());
+  }, [map, onZoomChange]);
+  return null;
+};
+
 const normalizeStateName = (name: string) =>
   name.toLowerCase().replace(/[^a-z]/g, "");
 
-const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
+const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: IndiaMapProps) => {
   const [activeMarket, setActiveMarket] = useState<string | null>(null);
   const [geoData, setGeoData] = useState<any>(null);
+  const [zoom, setZoom] = useState(5);
+
+  const showLabels = alwaysShowLabels || (zoom >= 8 && data.length <= 80);
 
   useEffect(() => {
     fetch(GEOJSON_URL)
@@ -90,6 +106,7 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
         style={{ background: "hsl(220, 15%, 94%)" }}
       >
         <FitBounds data={data} />
+        <MapEvents onZoomChange={setZoom} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -117,6 +134,16 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
               mouseout: () => setActiveMarket(null),
             }}
           >
+            {showLabels && (
+              <Tooltip
+                permanent
+                direction="right"
+                offset={[8, -4]}
+                className="market-label"
+              >
+                {market.marketName}
+              </Tooltip>
+            )}
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
               <div style={{ minWidth: 160, fontFamily: "system-ui, sans-serif" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
