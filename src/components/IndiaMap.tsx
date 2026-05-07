@@ -1,15 +1,23 @@
-import { useEffect, useState, useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap } from "react-leaflet";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, useMap, useMapEvents, Marker } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MarketData, BAND_COLORS, STATE_COLORS } from "@/data/marketData";
 
 interface IndiaMapProps {
   data: MarketData[];
   selectedStates?: string[];
+  alwaysShowLabels?: boolean;
 }
 
 const GEOJSON_URL =
   "https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson";
+
+const INVISIBLE_ICON = L.divIcon({
+  className: "",
+  iconSize: [0, 0],
+  iconAnchor: [0, 0],
+});
 
 const FitBounds = ({ data }: { data: MarketData[] }) => {
   const map = useMap();
@@ -26,12 +34,29 @@ const FitBounds = ({ data }: { data: MarketData[] }) => {
   return null;
 };
 
+const MapEvents = ({ onZoomChange }: { onZoomChange: (zoom: number) => void }) => {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+  useEffect(() => {
+    onZoomChange(map.getZoom());
+  }, [map, onZoomChange]);
+  return null;
+};
+
 const normalizeStateName = (name: string) =>
   name.toLowerCase().replace(/[^a-z]/g, "");
 
-const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
+const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: IndiaMapProps) => {
   const [activeMarket, setActiveMarket] = useState<string | null>(null);
   const [geoData, setGeoData] = useState<any>(null);
+  const [zoom, setZoom] = useState(5);
+
+  const showLabels = alwaysShowLabels || (zoom >= 8 && data.length <= 80);
+
+  const handleZoomChange = useCallback((z: number) => setZoom(z), []);
 
   useEffect(() => {
     fetch(GEOJSON_URL)
@@ -40,7 +65,6 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
       .catch(() => {});
   }, []);
 
-  // Build per-feature color map based on selected state order
   const { filteredGeo, stateColorMap } = useMemo(() => {
     if (!geoData || selectedStates.length === 0) return { filteredGeo: null, stateColorMap: {} as Record<string, string> };
     const normalizedSelected = selectedStates.map(normalizeStateName);
@@ -90,6 +114,7 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
         style={{ background: "hsl(220, 15%, 94%)" }}
       >
         <FitBounds data={data} />
+        <MapEvents onZoomChange={handleZoomChange} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -152,6 +177,23 @@ const IndiaMap = ({ data, selectedStates = [] }: IndiaMapProps) => {
               </div>
             </Tooltip>
           </CircleMarker>
+        ))}
+        {showLabels && data.map((market, idx) => (
+          <Marker
+            key={`label-${market.marketName}-${idx}`}
+            position={[market.coordinates[1], market.coordinates[0]]}
+            icon={INVISIBLE_ICON}
+            interactive={false}
+          >
+            <Tooltip
+              permanent
+              direction="right"
+              offset={[8, -4]}
+              className="market-label"
+            >
+              {market.marketName}
+            </Tooltip>
+          </Marker>
         ))}
       </MapContainer>
     </div>

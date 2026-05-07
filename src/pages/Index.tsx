@@ -1,6 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
 import { Camera, Presentation } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import IndiaMap from "@/components/IndiaMap";
 import { BandLegend } from "@/components/BandLegend";
 import { BandCountsLegend } from "@/components/BandCountsLegend";
@@ -20,6 +22,7 @@ const Index = () => {
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [pptOpen, setPptOpen] = useState(false);
   const [snipping, setSnipping] = useState(false);
+  const [alwaysShowLabels, setAlwaysShowLabels] = useState(false);
 
   const filteredData = useMemo(
     () => (marketData ? applyFilters(marketData, filters) : []),
@@ -65,7 +68,17 @@ const Index = () => {
             <div className="bg-card rounded-xl border border-border p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold text-card-foreground">Market Band Map</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      id="show-labels"
+                      checked={alwaysShowLabels}
+                      onCheckedChange={setAlwaysShowLabels}
+                    />
+                    <Label htmlFor="show-labels" className="text-xs text-muted-foreground cursor-pointer">
+                      Labels
+                    </Label>
+                  </div>
                   <BandLegend />
                   <Button
                     variant="outline"
@@ -99,7 +112,7 @@ const Index = () => {
                 </p>
               </div>
               <div className="h-[550px] relative" id={MAP_ELEMENT_ID}>
-                <IndiaMap data={filteredData} selectedStates={filters.state} />
+                <IndiaMap data={filteredData} selectedStates={filters.state} alwaysShowLabels={alwaysShowLabels} />
                 <FilterSummaryOverlay filters={filters} />
                 <BandCountsLegend data={filteredData} />
               </div>

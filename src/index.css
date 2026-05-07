@@ -122,3 +122,17 @@ All colors MUST be HSL.
 .leaflet-container-scoped .leaflet-popup {
   z-index: 20 !important;
 }
+
+.market-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  font-size: 10px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+}
+.market-label::before {
+  display: none !important;
+}
