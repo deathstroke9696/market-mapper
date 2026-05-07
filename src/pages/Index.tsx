@@ -68,7 +68,17 @@ const Index = () => {
             <div className="bg-card rounded-xl border border-border p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold text-card-foreground">Market Band Map</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      id="show-labels"
+                      checked={alwaysShowLabels}
+                      onCheckedChange={setAlwaysShowLabels}
+                    />
+                    <Label htmlFor="show-labels" className="text-xs text-muted-foreground cursor-pointer">
+                      Labels
+                    </Label>
+                  </div>
                   <BandLegend />
                   <Button
                     variant="outline"
@@ -102,7 +112,7 @@ const Index = () => {
                 </p>
               </div>
               <div className="h-[550px] relative" id={MAP_ELEMENT_ID}>
-                <IndiaMap data={filteredData} selectedStates={filters.state} />
+                <IndiaMap data={filteredData} selectedStates={filters.state} alwaysShowLabels={alwaysShowLabels} />
                 <FilterSummaryOverlay filters={filters} />
                 <BandCountsLegend data={filteredData} />
               </div>
