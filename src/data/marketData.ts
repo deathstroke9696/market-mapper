@@ -8,8 +8,8 @@ export interface MarketData {
   region: string;
   cluster: string;
   goiDistrict: string;
-  brand: string;
-  segment: string;
+  solution: string;
+  structure: string;
   popGroup: string;
   vol: number;
   volPercent: number;
@@ -49,8 +49,8 @@ export const FILTER_FIELDS = [
   { key: "cluster" as const, label: "Cluster" },
   { key: "state" as const, label: "State" },
   { key: "goiDistrict" as const, label: "GOI District" },
-  { key: "brand" as const, label: "Brand" },
-  { key: "segment" as const, label: "Segment" },
+  { key: "solution" as const, label: "Solution" },
+  { key: "structure" as const, label: "Structure" },
   { key: "popGroup" as const, label: "Pop Group" },
 ];
 
@@ -60,7 +60,7 @@ export type Filters = Record<FilterKey, string[]>;
 
 export const emptyFilters = (): Filters => ({
   branch: [], trendBelt: [], region: [], cluster: [], state: [],
-  goiDistrict: [], brand: [], segment: [], popGroup: [],
+  goiDistrict: [], solution: [], structure: [], popGroup: [],
 });
 
 export const applyFilters = (data: MarketData[], filters: Filters): MarketData[] =>

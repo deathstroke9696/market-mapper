@@ -177,8 +177,8 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         const clusterCol = findCol("cluster");
         const popGroupCol = findCol("pop group") || findCol("popgroup") || findCol("pop_group");
         const goiDistCol = findCol("goi district") || findCol("goi_district") || findCol("district");
-        const brandCol = findCol("brand");
-        const segmentCol = findCol("segment");
+        const solutionCol = findCol("solution");
+        const structureCol = findCol("structure");
         // Vol columns: find "%" first, then "vol" excluding %
         const volPctCol = keys.find((k) => k.trim() === "%") || findCol("vol %") || findCol("vol%");
         const volCol = keys.find(
@@ -233,8 +233,8 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
             region: regionCol ? String(row[regionCol] || "").trim() : "—",
             cluster: clusterCol ? String(row[clusterCol] || "").trim() : "—",
             goiDistrict: goiDistCol ? String(row[goiDistCol] || "").trim() : "—",
-            brand: brandCol ? String(row[brandCol] || "").trim() : "—",
-            segment: segmentCol ? String(row[segmentCol] || "").trim() : "—",
+            solution: solutionCol ? String(row[solutionCol] || "").trim() : "—",
+            structure: structureCol ? String(row[structureCol] || "").trim() : "—",
             popGroup: popGroupCol ? String(row[popGroupCol] || "").trim() : "—",
             vol,
             volPercent,
@@ -315,7 +315,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
             <div>
               <p className="text-sm font-medium text-foreground">Drag & drop your Excel file here</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Trend Belt | Region | Cluster | GOI District | Brand | Segment | Town | Pop Group | Vol | % | Band | State</span>
+                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Trend Belt | Region | Cluster | GOI District | Solution | Structure | Town | Pop Group | Vol | % | Band | State</span>
               </p>
             </div>
           )}
