@@ -315,7 +315,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
             <div>
               <p className="text-sm font-medium text-foreground">Drag & drop your Excel file here</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Circle | Section | GOI District | Brand | Segment | Town | Vol | % | Band | State</span>
+                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Trend Belt | Region | Cluster | GOI District | Brand | Segment | Town | Pop Group | Vol | % | Band | State</span>
               </p>
             </div>
           )}
