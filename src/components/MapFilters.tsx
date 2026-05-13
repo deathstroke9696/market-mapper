@@ -1,13 +1,14 @@
-import { useMemo } from "react";
-import { X, Filter, ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { X, Filter, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MarketData, FILTER_FIELDS, Filters, FilterKey } from "@/data/marketData";
+import { MarketData, FILTER_FIELDS, Filters, FilterKey, applyFilters } from "@/data/marketData";
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 interface MapFiltersProps {
   data: MarketData[];
@@ -16,14 +17,20 @@ interface MapFiltersProps {
 }
 
 export const MapFilters = ({ data, filters, onChange }: MapFiltersProps) => {
+  const [search, setSearch] = useState<Record<string, string>>({});
+
+  // Cascading options: for each filter key, compute available values
+  // by applying all OTHER active filters to the data.
   const options = useMemo(() => {
     const map: Record<FilterKey, string[]> = {} as any;
     for (const { key } of FILTER_FIELDS) {
-      const vals = [...new Set(data.map((d) => d[key]).filter((v) => v && v !== "—"))].sort();
+      const otherFilters: Filters = { ...filters, [key]: [] };
+      const subset = applyFilters(data, otherFilters);
+      const vals = [...new Set(subset.map((d) => d[key]).filter((v) => v && v !== "—"))].sort();
       map[key] = vals;
     }
     return map;
-  }, [data]);
+  }, [data, filters]);
 
   const activeCount = Object.values(filters).reduce((s, arr) => s + arr.length, 0);
 
@@ -51,11 +58,12 @@ export const MapFilters = ({ data, filters, onChange }: MapFiltersProps) => {
     const empty: Filters = {} as any;
     for (const { key } of FILTER_FIELDS) empty[key] = [];
     onChange(empty);
+    setSearch({});
   };
 
   return (
     <div className="space-y-3">
-      {/* Header with filter count and clear all */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
@@ -74,12 +82,19 @@ export const MapFilters = ({ data, filters, onChange }: MapFiltersProps) => {
         )}
       </div>
 
-      {/* Filter buttons row */}
+      {/* Filter buttons */}
       <div className="flex flex-wrap items-center gap-2">
         {FILTER_FIELDS.map(({ key, label }) => {
           const selected = filters[key];
           const opts = options[key] || [];
-          if (opts.length === 0) return null;
+          // Always include currently selected values even if filtered out
+          const allOpts = [...new Set([...opts, ...selected])].sort();
+          const q = (search[key] || "").toLowerCase().trim();
+          const visibleOpts = q
+            ? allOpts.filter((v) => v.toLowerCase().includes(q))
+            : allOpts;
+
+          if (allOpts.length === 0) return null;
 
           return (
             <Popover key={key}>
@@ -98,25 +113,40 @@ export const MapFilters = ({ data, filters, onChange }: MapFiltersProps) => {
                   <ChevronDown className="w-3 h-3 ml-0.5 opacity-60" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-0" align="start">
+              <PopoverContent className="w-64 p-0" align="start">
                 <div className="p-2 border-b border-border flex items-center justify-between">
                   <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                  <span className="text-[10px] text-muted-foreground">{opts.length} options</span>
+                  <span className="text-[10px] text-muted-foreground">{allOpts.length} options</span>
+                </div>
+                <div className="p-2 border-b border-border">
+                  <div className="relative">
+                    <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={search[key] || ""}
+                      onChange={(e) => setSearch({ ...search, [key]: e.target.value })}
+                      placeholder={`Search ${label.toLowerCase()}...`}
+                      className="h-7 pl-7 text-xs"
+                    />
+                  </div>
                 </div>
                 <ScrollArea className="max-h-56">
                   <div className="p-2 space-y-1">
-                    {opts.map((val) => (
-                      <label
-                        key={val}
-                        className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-sm"
-                      >
-                        <Checkbox
-                          checked={selected.includes(val)}
-                          onCheckedChange={() => toggle(key, val)}
-                        />
-                        <span className="truncate">{val}</span>
-                      </label>
-                    ))}
+                    {visibleOpts.length === 0 ? (
+                      <p className="text-xs text-muted-foreground px-2 py-3 text-center">No matches</p>
+                    ) : (
+                      visibleOpts.map((val) => (
+                        <label
+                          key={val}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-sm"
+                        >
+                          <Checkbox
+                            checked={selected.includes(val)}
+                            onCheckedChange={() => toggle(key, val)}
+                          />
+                          <span className="truncate">{val}</span>
+                        </label>
+                      ))
+                    )}
                   </div>
                 </ScrollArea>
                 {selected.length > 0 && (
@@ -137,7 +167,7 @@ export const MapFilters = ({ data, filters, onChange }: MapFiltersProps) => {
         })}
       </div>
 
-      {/* Selected filter chips */}
+      {/* Selected chips */}
       {activeEntries.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           {activeEntries.map(({ key, label, val }) => (
