@@ -36,8 +36,8 @@ export async function captureMapAsDataUrl(
 export function suggestSlideTitle(filters: Filters): string {
   const parts: string[] = [];
   if (filters.state.length > 0) parts.push(filters.state.join(", "));
-  if (filters.brand.length > 0) parts.push(filters.brand.join(", "));
-  if (filters.segment.length > 0) parts.push(filters.segment.join(", "));
+  if (filters.solution.length > 0) parts.push(filters.solution.join(", "));
+  if (filters.structure.length > 0) parts.push(filters.structure.join(", "));
   if (filters.branch.length > 0) parts.push(filters.branch.join(", "));
   if (parts.length === 0) {
     const active = FILTER_FIELDS.filter(({ key }) => filters[key].length > 0);

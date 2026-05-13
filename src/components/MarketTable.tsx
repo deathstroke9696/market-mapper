@@ -15,8 +15,8 @@ export const MarketTable = ({ data }: MarketTableProps) => (
           <TableHead className="text-muted-foreground font-semibold text-xs">Town</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">State</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">Branch</TableHead>
-          <TableHead className="text-muted-foreground font-semibold text-xs">Brand</TableHead>
-          <TableHead className="text-muted-foreground font-semibold text-xs">Segment</TableHead>
+          <TableHead className="text-muted-foreground font-semibold text-xs">Solution</TableHead>
+          <TableHead className="text-muted-foreground font-semibold text-xs">Structure</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs">Trend Belt</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs text-right">Vol</TableHead>
           <TableHead className="text-muted-foreground font-semibold text-xs text-right">Vol %</TableHead>
@@ -29,8 +29,8 @@ export const MarketTable = ({ data }: MarketTableProps) => (
             <TableCell className="font-medium text-sm text-card-foreground">{row.marketName}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{row.state}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{row.branch}</TableCell>
-            <TableCell className="text-sm text-muted-foreground">{row.brand}</TableCell>
-            <TableCell className="text-sm text-muted-foreground">{row.segment}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{row.solution}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{row.structure}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{row.trendBelt}</TableCell>
             <TableCell className="text-right text-sm">{(row.vol ?? 0).toLocaleString()}</TableCell>
             <TableCell className="text-right text-sm">{row.volPercent ?? 0}%</TableCell>
