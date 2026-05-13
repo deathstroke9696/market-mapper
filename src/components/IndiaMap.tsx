@@ -52,9 +52,10 @@ const MapEvents = ({ onZoomChange }: { onZoomChange: (zoom: number) => void }) =
 const normalizeStateName = (name: string) =>
   name.toLowerCase().replace(/[^a-z]/g, "");
 
-const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: IndiaMapProps) => {
+const IndiaMap = ({ data, selectedStates = [], selectedDistricts = [], alwaysShowLabels = false }: IndiaMapProps) => {
   const [activeMarket, setActiveMarket] = useState<string | null>(null);
   const [geoData, setGeoData] = useState<any>(null);
+  const [districtGeoData, setDistrictGeoData] = useState<any>(null);
   const [zoom, setZoom] = useState(5);
 
   const showLabels = alwaysShowLabels || (zoom >= 8 && data.length <= 80);
@@ -67,6 +68,14 @@ const IndiaMap = ({ data, selectedStates = [], alwaysShowLabels = false }: India
       .then(setGeoData)
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (selectedDistricts.length === 0 || districtGeoData) return;
+    fetch(DISTRICT_GEOJSON_URL)
+      .then((r) => r.json())
+      .then(setDistrictGeoData)
+      .catch(() => {});
+  }, [selectedDistricts, districtGeoData]);
 
   const { filteredGeo, stateColorMap } = useMemo(() => {
     if (!geoData || selectedStates.length === 0) return { filteredGeo: null, stateColorMap: {} as Record<string, string> };
