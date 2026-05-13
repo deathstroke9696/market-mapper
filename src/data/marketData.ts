@@ -4,12 +4,13 @@ export interface MarketData {
   marketName: string;
   state: string;
   branch: string;
-  circle: string;
-  section: string;
+  trendBelt: string;
+  region: string;
+  cluster: string;
   goiDistrict: string;
   brand: string;
   segment: string;
-  trendBelt: string;
+  popGroup: string;
   vol: number;
   volPercent: number;
   band: Band;
