@@ -173,8 +173,9 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         const stateCol = findCol("state");
         const bandCol = findCol("band");
         const branchCol = findCol("branch");
-        const circleCol = findCol("circle");
-        const sectionCol = findCol("section");
+        const regionCol = findCol("region");
+        const clusterCol = findCol("cluster");
+        const popGroupCol = findCol("pop group") || findCol("popgroup") || findCol("pop_group");
         const goiDistCol = findCol("goi district") || findCol("goi_district") || findCol("district");
         const brandCol = findCol("brand");
         const segmentCol = findCol("segment");
@@ -228,12 +229,13 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
             marketName: town,
             state: state || "—",
             branch: branchCol ? String(row[branchCol] || "").trim() : "—",
-            circle: circleCol ? String(row[circleCol] || "").trim() : "—",
-            section: sectionCol ? String(row[sectionCol] || "").trim() : "—",
+            trendBelt: trendBeltCol ? String(row[trendBeltCol] || "").trim() : "—",
+            region: regionCol ? String(row[regionCol] || "").trim() : "—",
+            cluster: clusterCol ? String(row[clusterCol] || "").trim() : "—",
             goiDistrict: goiDistCol ? String(row[goiDistCol] || "").trim() : "—",
             brand: brandCol ? String(row[brandCol] || "").trim() : "—",
             segment: segmentCol ? String(row[segmentCol] || "").trim() : "—",
-            trendBelt: trendBeltCol ? String(row[trendBeltCol] || "").trim() : "—",
+            popGroup: popGroupCol ? String(row[popGroupCol] || "").trim() : "—",
             vol,
             volPercent,
             band,
@@ -313,7 +315,7 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
             <div>
               <p className="text-sm font-medium text-foreground">Drag & drop your Excel file here</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Circle | Section | GOI District | Brand | Segment | Town | Vol | % | Band | State</span>
+                Format: <span className="font-mono bg-muted px-1.5 py-0.5 rounded">Branch | Trend Belt | Region | Cluster | GOI District | Brand | Segment | Town | Pop Group | Vol | % | Band | State</span>
               </p>
             </div>
           )}
