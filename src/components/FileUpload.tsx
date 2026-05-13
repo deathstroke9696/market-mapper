@@ -173,8 +173,9 @@ export const FileUpload = ({ onDataLoaded }: FileUploadProps) => {
         const stateCol = findCol("state");
         const bandCol = findCol("band");
         const branchCol = findCol("branch");
-        const circleCol = findCol("circle");
-        const sectionCol = findCol("section");
+        const regionCol = findCol("region");
+        const clusterCol = findCol("cluster");
+        const popGroupCol = findCol("pop group") || findCol("popgroup") || findCol("pop_group");
         const goiDistCol = findCol("goi district") || findCol("goi_district") || findCol("district");
         const brandCol = findCol("brand");
         const segmentCol = findCol("segment");
