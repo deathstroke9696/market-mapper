@@ -7,11 +7,14 @@ import { MarketData, BAND_COLORS, STATE_COLORS } from "@/data/marketData";
 interface IndiaMapProps {
   data: MarketData[];
   selectedStates?: string[];
+  selectedDistricts?: string[];
   alwaysShowLabels?: boolean;
 }
 
 const GEOJSON_URL =
   "https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson";
+const DISTRICT_GEOJSON_URL =
+  "https://raw.githubusercontent.com/geohacker/india/master/district/india_district.geojson";
 
 const INVISIBLE_ICON = L.divIcon({
   className: "",
