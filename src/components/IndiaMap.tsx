@@ -164,6 +164,13 @@ const IndiaMap = ({ data, selectedStates = [], selectedDistricts = [], alwaysSho
             style={geoStyle}
           />
         )}
+        {filteredDistrictGeo && (
+          <GeoJSON
+            key={`dist-${selectedDistricts.join(",")}`}
+            data={filteredDistrictGeo}
+            style={districtStyle}
+          />
+        )}
         {data.map((market, idx) => (
           <CircleMarker
             key={`${market.marketName}-${idx}`}
