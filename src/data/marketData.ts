@@ -44,13 +44,14 @@ export const BAND_COLORS: Record<Band, string> = {
 
 export const FILTER_FIELDS = [
   { key: "branch" as const, label: "Branch" },
+  { key: "trendBelt" as const, label: "Trend Belt" },
+  { key: "region" as const, label: "Region" },
+  { key: "cluster" as const, label: "Cluster" },
   { key: "state" as const, label: "State" },
-  { key: "section" as const, label: "Section" },
-  { key: "circle" as const, label: "Circle" },
   { key: "goiDistrict" as const, label: "GOI District" },
   { key: "brand" as const, label: "Brand" },
   { key: "segment" as const, label: "Segment" },
-  { key: "trendBelt" as const, label: "Trend Belt" },
+  { key: "popGroup" as const, label: "Pop Group" },
 ];
 
 export type FilterKey = typeof FILTER_FIELDS[number]["key"];
@@ -58,8 +59,8 @@ export type FilterKey = typeof FILTER_FIELDS[number]["key"];
 export type Filters = Record<FilterKey, string[]>;
 
 export const emptyFilters = (): Filters => ({
-  branch: [], state: [], section: [], circle: [],
-  goiDistrict: [], brand: [], segment: [], trendBelt: [],
+  branch: [], trendBelt: [], region: [], cluster: [], state: [],
+  goiDistrict: [], brand: [], segment: [], popGroup: [],
 });
 
 export const applyFilters = (data: MarketData[], filters: Filters): MarketData[] =>
