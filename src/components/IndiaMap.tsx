@@ -100,6 +100,24 @@ const IndiaMap = ({ data, selectedStates = [], selectedDistricts = [], alwaysSho
     };
   }, [geoData, selectedStates]);
 
+  const filteredDistrictGeo = useMemo(() => {
+    if (!districtGeoData || selectedDistricts.length === 0) return null;
+    const normalizedSelected = selectedDistricts.map(normalizeStateName);
+    const filtered = {
+      ...districtGeoData,
+      features: districtGeoData.features.filter((f: any) => {
+        const p = f.properties || {};
+        const name = normalizeStateName(
+          p.NAME_2 || p.DISTRICT || p.district || p.name || p.NAME || ""
+        );
+        return normalizedSelected.some(
+          (sel) => name === sel || name.includes(sel) || sel.includes(name)
+        );
+      }),
+    };
+    return filtered.features.length > 0 ? filtered : null;
+  }, [districtGeoData, selectedDistricts]);
+
   const geoStyle = (feature: any) => {
     const name = normalizeStateName(feature?.properties?.NAME_1 || feature?.properties?.name || feature?.properties?.NAME || "");
     const normalizedSelected = selectedStates.map(normalizeStateName);
@@ -113,6 +131,14 @@ const IndiaMap = ({ data, selectedStates = [], selectedDistricts = [], alwaysSho
       dashArray: "6 3",
     };
   };
+
+  const districtStyle = () => ({
+    color: "hsl(280, 70%, 40%)",
+    weight: 2.5,
+    fillColor: "hsl(280, 70%, 50%)",
+    fillOpacity: 0.18,
+    dashArray: "4 2",
+  });
 
   return (
     <div className="leaflet-container-scoped relative w-full h-full rounded-lg overflow-hidden">
