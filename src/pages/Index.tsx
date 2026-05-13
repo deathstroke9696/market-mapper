@@ -112,7 +112,7 @@ const Index = () => {
                 </p>
               </div>
               <div className="h-[550px] relative" id={MAP_ELEMENT_ID}>
-                <IndiaMap data={filteredData} selectedStates={filters.state} alwaysShowLabels={alwaysShowLabels} />
+                <IndiaMap data={filteredData} selectedStates={filters.state} selectedDistricts={filters.goiDistrict} alwaysShowLabels={alwaysShowLabels} />
                 <FilterSummaryOverlay filters={filters} />
                 <BandCountsLegend data={filteredData} />
               </div>
